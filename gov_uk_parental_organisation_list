@@ -1,0 +1,27 @@
+select driving_table.slug, t2.slug, t3.slug
+from (
+select t1.id, t1.slug from organisations as t1
+inner join organisational_relationships as t2
+on t2.parent_organisation_id = t1.id
+and not exists 
+(select * from organisational_relationships 
+where child_organisation_id = t1.id)
+union
+select t1.id, t1.slug from organisations as t1
+where not exists
+(select * from organisational_relationships 
+where child_organisation_id = t1.id)
+#and not exists
+#(select * from organisational_relationships
+#where parent_organisation_id = t1.id)
+) as driving_table
+
+left outer join organisational_relationships as tr1
+on tr1.parent_organisation_id = driving_table.id
+left outer join organisations as  t2
+on t2.id = tr1.child_organisation_id
+left outer join organisational_relationships as tr2
+on tr1.child_organisation_id = tr2.parent_organisation_id
+left outer join organisations as t3
+on t3.id = tr2.child_organisation_id
+
